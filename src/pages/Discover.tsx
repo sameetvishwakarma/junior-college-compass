@@ -3,64 +3,98 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CollegeFilters from "@/components/CollegeFilters";
 import CollegeCard from "@/components/CollegeCard";
-import { colleges, feeRanges } from "@/data/colleges";
+import { colleges, feeRanges, College, StreamData } from "@/data/colleges";
 import { School, Filter } from "lucide-react";
+
+interface FilteredCollege {
+  college: College;
+  filteredStreams: StreamData[];
+}
 
 const Discover = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [percentageRange, setPercentageRange] = useState("all");
   const [category, setCategory] = useState("all");
   const [feeRange, setFeeRange] = useState("all");
-  const [subject, setSubject] = useState("all");
+  const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
 
-  const filteredColleges = useMemo(() => {
-    return colleges.filter((college) => {
+  const filteredColleges = useMemo((): FilteredCollege[] => {
+    const results: FilteredCollege[] = [];
+
+    for (const college of colleges) {
       // Search filter
       if (searchQuery && !college.name.toLowerCase().includes(searchQuery.toLowerCase())) {
-        return false;
+        continue;
       }
 
-      // Percentage range filter
-      if (percentageRange !== "all") {
-        const [minStr, maxStr] = percentageRange.split(" – ");
-        const min = parseInt(minStr);
-        const max = parseInt(maxStr);
-        
-        const categoryKey = category === "all" ? "open" : category;
-        const cutoff = college.cutoffs[categoryKey as keyof typeof college.cutoffs];
-        
-        // Student's percentage should be >= cutoff
-        // If min percentage is less than cutoff, student is not eligible
-        if (min < cutoff) {
+      // Filter streams within each college
+      const matchingStreams = college.streams.filter((streamData) => {
+        // Stream filter
+        if (selectedStreams.length > 0 && !selectedStreams.includes(streamData.stream)) {
           return false;
         }
-      }
 
-      // Fee range filter
-      if (feeRange !== "all") {
-        const selectedFeeRange = feeRanges.find((f) => f.value === feeRange);
-        if (selectedFeeRange) {
-          const collegeFee = category === "all" || category === "open" 
-            ? college.fees.open 
-            : college.fees.reserved;
-          
-          if (selectedFeeRange.max && collegeFee > selectedFeeRange.max) {
-            return false;
-          }
-          if (selectedFeeRange.min && collegeFee < selectedFeeRange.min) {
+        // Subject filter - stream must have at least one of the selected subjects
+        if (selectedSubjects.length > 0) {
+          const hasMatchingSubject = selectedSubjects.some((subject) =>
+            streamData.subjects.includes(subject)
+          );
+          if (!hasMatchingSubject) {
             return false;
           }
         }
-      }
 
-      // Subject filter
-      if (subject !== "all" && !college.subjects.includes(subject)) {
-        return false;
-      }
+        // Percentage range filter
+        if (percentageRange !== "all") {
+          const [minStr, maxStr] = percentageRange.split(" – ");
+          const min = parseInt(minStr);
+          
+          const categoryKey = category === "all" ? "open" : category;
+          const cutoff = streamData.cutoffs[categoryKey as keyof typeof streamData.cutoffs];
+          
+          // Student's percentage should be >= cutoff
+          if (min < cutoff) {
+            return false;
+          }
+        }
 
-      return true;
-    });
-  }, [searchQuery, percentageRange, category, feeRange, subject]);
+        // Fee range filter
+        if (feeRange !== "all") {
+          const selectedFeeRange = feeRanges.find((f) => f.value === feeRange);
+          if (selectedFeeRange) {
+            const streamFee = category === "all" || category === "open"
+              ? streamData.fees.open
+              : streamData.fees.reserved;
+
+            if (selectedFeeRange.max && streamFee > selectedFeeRange.max) {
+              return false;
+            }
+            if (selectedFeeRange.min && streamFee < selectedFeeRange.min) {
+              return false;
+            }
+          }
+        }
+
+        return true;
+      });
+
+      // Only include college if it has matching streams
+      if (matchingStreams.length > 0) {
+        results.push({
+          college,
+          filteredStreams: matchingStreams,
+        });
+      }
+    }
+
+    return results;
+  }, [searchQuery, percentageRange, category, feeRange, selectedStreams, selectedSubjects]);
+
+  const totalStreamsCount = filteredColleges.reduce(
+    (acc, item) => acc + item.filteredStreams.length,
+    0
+  );
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -94,8 +128,10 @@ const Discover = () => {
             setCategory={setCategory}
             feeRange={feeRange}
             setFeeRange={setFeeRange}
-            subject={subject}
-            setSubject={setSubject}
+            selectedStreams={selectedStreams}
+            setSelectedStreams={setSelectedStreams}
+            selectedSubjects={selectedSubjects}
+            setSelectedSubjects={setSelectedSubjects}
           />
 
           {/* Results Header */}
@@ -104,20 +140,26 @@ const Discover = () => {
               <Filter className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
                 Showing <span className="font-semibold text-foreground">{filteredColleges.length}</span> colleges
+                {" · "}
+                <span className="font-semibold text-foreground">{totalStreamsCount}</span> streams
               </span>
             </div>
           </div>
 
           {/* College Grid */}
           {filteredColleges.length > 0 ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredColleges.map((college, index) => (
+            <div className="grid gap-6 lg:grid-cols-2">
+              {filteredColleges.map(({ college, filteredStreams }, index) => (
                 <div
                   key={college.id}
                   className="animate-fade-in"
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  <CollegeCard college={college} selectedCategory={category} />
+                  <CollegeCard
+                    college={college}
+                    selectedCategory={category}
+                    filteredStreams={filteredStreams}
+                  />
                 </div>
               ))}
             </div>
@@ -130,7 +172,7 @@ const Discover = () => {
                 No colleges found
               </h3>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Try adjusting your filters. You might need to expand your percentage range or select a different category.
+                Try adjusting your filters. You might need to expand your percentage range or select different streams/subjects.
               </p>
             </div>
           )}
