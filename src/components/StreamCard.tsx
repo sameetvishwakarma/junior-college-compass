@@ -1,4 +1,4 @@
-import { Beaker, Briefcase, Palette, Cpu, IndianRupee } from "lucide-react";
+import { Beaker, Briefcase, Palette, IndianRupee } from "lucide-react";
 import { StreamData } from "@/data/colleges";
 import { Button } from "@/components/ui/button";
 
@@ -30,7 +30,6 @@ const StreamCard = ({ streamData, selectedCategory }: StreamCardProps) => {
       case "Science": return <Beaker className="h-4 w-4" />;
       case "Commerce": return <Briefcase className="h-4 w-4" />;
       case "Arts": return <Palette className="h-4 w-4" />;
-      case "Bifocal": return <Cpu className="h-4 w-4" />;
       default: return null;
     }
   };
@@ -40,7 +39,6 @@ const StreamCard = ({ streamData, selectedCategory }: StreamCardProps) => {
       case "Science": return "bg-blue-500/10 text-blue-600 border-blue-200";
       case "Commerce": return "bg-emerald-500/10 text-emerald-600 border-emerald-200";
       case "Arts": return "bg-purple-500/10 text-purple-600 border-purple-200";
-      case "Bifocal": return "bg-orange-500/10 text-orange-600 border-orange-200";
       default: return "bg-muted text-muted-foreground";
     }
   };

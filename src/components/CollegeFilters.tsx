@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { percentageRanges, categories, feeRanges, streams, allSubjects } from "@/data/colleges";
+import { percentageRanges, categories, feeRanges, streams } from "@/data/colleges";
 
 interface CollegeFiltersProps {
   searchQuery: string;
@@ -22,8 +22,6 @@ interface CollegeFiltersProps {
   setFeeRange: (value: string) => void;
   selectedStreams: string[];
   setSelectedStreams: (value: string[]) => void;
-  selectedSubjects: string[];
-  setSelectedSubjects: (value: string[]) => void;
 }
 
 const CollegeFilters = ({
@@ -37,22 +35,12 @@ const CollegeFilters = ({
   setFeeRange,
   selectedStreams,
   setSelectedStreams,
-  selectedSubjects,
-  setSelectedSubjects,
 }: CollegeFiltersProps) => {
   const handleStreamChange = (stream: string, checked: boolean) => {
     if (checked) {
       setSelectedStreams([...selectedStreams, stream]);
     } else {
       setSelectedStreams(selectedStreams.filter((s) => s !== stream));
-    }
-  };
-
-  const handleSubjectChange = (subject: string, checked: boolean) => {
-    if (checked) {
-      setSelectedSubjects([...selectedSubjects, subject]);
-    } else {
-      setSelectedSubjects(selectedSubjects.filter((s) => s !== subject));
     }
   };
 
@@ -136,11 +124,11 @@ const CollegeFilters = ({
       </div>
 
       {/* Stream Checkboxes */}
-      <div className="mb-6">
+      <div>
         <label className="text-sm font-medium text-foreground mb-3 block">
           Stream Filter
         </label>
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-6">
           {streams.map((stream) => (
             <div key={stream} className="flex items-center space-x-2">
               <Checkbox
@@ -153,30 +141,6 @@ const CollegeFilters = ({
                 className="text-sm font-normal cursor-pointer"
               >
                 {stream}
-              </Label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Subject Checkboxes */}
-      <div>
-        <label className="text-sm font-medium text-foreground mb-3 block">
-          Subject Filter
-        </label>
-        <div className="flex flex-wrap gap-x-6 gap-y-3">
-          {allSubjects.map((subject) => (
-            <div key={subject} className="flex items-center space-x-2">
-              <Checkbox
-                id={`subject-${subject}`}
-                checked={selectedSubjects.includes(subject)}
-                onCheckedChange={(checked) => handleSubjectChange(subject, checked as boolean)}
-              />
-              <Label
-                htmlFor={`subject-${subject}`}
-                className="text-sm font-normal cursor-pointer"
-              >
-                {subject}
               </Label>
             </div>
           ))}

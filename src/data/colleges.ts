@@ -23,7 +23,7 @@ export interface College {
   streams: StreamData[];
 }
 
-export const streams = ["Science", "Commerce", "Arts", "Bifocal"] as const;
+export const streams = ["Science", "Commerce", "Arts"] as const;
 
 export const allSubjects = [
   "Computer Science / IT",

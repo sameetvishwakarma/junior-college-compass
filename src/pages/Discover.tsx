@@ -17,7 +17,6 @@ const Discover = () => {
   const [category, setCategory] = useState("all");
   const [feeRange, setFeeRange] = useState("all");
   const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
 
   const filteredColleges = useMemo((): FilteredCollege[] => {
     const results: FilteredCollege[] = [];
@@ -28,21 +27,16 @@ const Discover = () => {
         continue;
       }
 
-      // Filter streams within each college
+      // Filter streams within each college (exclude Bifocal)
       const matchingStreams = college.streams.filter((streamData) => {
-        // Stream filter
-        if (selectedStreams.length > 0 && !selectedStreams.includes(streamData.stream)) {
+        // Exclude Bifocal streams
+        if (streamData.stream === "Bifocal") {
           return false;
         }
 
-        // Subject filter - stream must have at least one of the selected subjects
-        if (selectedSubjects.length > 0) {
-          const hasMatchingSubject = selectedSubjects.some((subject) =>
-            streamData.subjects.includes(subject)
-          );
-          if (!hasMatchingSubject) {
-            return false;
-          }
+        // Stream filter
+        if (selectedStreams.length > 0 && !selectedStreams.includes(streamData.stream)) {
+          return false;
         }
 
         // Percentage range filter
@@ -89,7 +83,7 @@ const Discover = () => {
     }
 
     return results;
-  }, [searchQuery, percentageRange, category, feeRange, selectedStreams, selectedSubjects]);
+  }, [searchQuery, percentageRange, category, feeRange, selectedStreams]);
 
   const totalStreamsCount = filteredColleges.reduce(
     (acc, item) => acc + item.filteredStreams.length,
@@ -130,8 +124,6 @@ const Discover = () => {
             setFeeRange={setFeeRange}
             selectedStreams={selectedStreams}
             setSelectedStreams={setSelectedStreams}
-            selectedSubjects={selectedSubjects}
-            setSelectedSubjects={setSelectedSubjects}
           />
 
           {/* Results Header */}
