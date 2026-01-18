@@ -50,7 +50,6 @@ const CollegeCard = ({ college, selectedCategory, filteredStreams }: CollegeCard
               key={streamData.stream}
               streamData={streamData}
               selectedCategory={selectedCategory}
-              collegeType={college.type}
             />
           ))}
         </div>

@@ -1,15 +1,13 @@
-import { Beaker, Briefcase, Palette, IndianRupee, Tag, TrendingDown } from "lucide-react";
-import { StreamData, College } from "@/data/colleges";
+import { Beaker, Briefcase, Palette, IndianRupee } from "lucide-react";
+import { StreamData } from "@/data/colleges";
 import { Button } from "@/components/ui/button";
-import { calculateFinalFee, getConcessionLabel, hasFeeConcession } from "@/lib/feeCalculator";
 
 interface StreamCardProps {
   streamData: StreamData;
   selectedCategory: string;
-  collegeType: College["type"];
 }
 
-const StreamCard = ({ streamData, selectedCategory, collegeType }: StreamCardProps) => {
+const StreamCard = ({ streamData, selectedCategory }: StreamCardProps) => {
   const getCategoryKey = (cat: string): keyof StreamData["cutoffs"] => {
     switch (cat) {
       case "obc": return "obc";
@@ -23,20 +21,9 @@ const StreamCard = ({ streamData, selectedCategory, collegeType }: StreamCardPro
 
   const categoryKey = getCategoryKey(selectedCategory);
   const cutoff = streamData.cutoffs[categoryKey];
-  
-  // Base fee depends on whether it's open category or reserved
-  const baseFee = selectedCategory === "open" || selectedCategory === "all"
+  const fee = selectedCategory === "open" || selectedCategory === "all"
     ? streamData.fees.open
     : streamData.fees.reserved;
-
-  // Calculate final fee with concession
-  const { finalFee, concessionAmount, concessionPercent } = calculateFinalFee(
-    baseFee,
-    selectedCategory === "all" ? "open" : selectedCategory
-  );
-
-  const showConcession = hasFeeConcession(selectedCategory) && selectedCategory !== "all";
-  const concessionLabel = getConcessionLabel(selectedCategory);
 
   const getStreamIcon = (stream: string) => {
     switch (stream) {
@@ -89,48 +76,14 @@ const StreamCard = ({ streamData, selectedCategory, collegeType }: StreamCardPro
           </p>
           <p className="text-lg font-bold text-primary">{cutoff}%</p>
         </div>
-        
-        {/* Fee Display with Concession */}
         <div className="bg-background/80 rounded-md p-2">
           <div className="flex items-center gap-1 text-xs text-muted-foreground mb-0.5">
             <IndianRupee className="h-3 w-3" />
-            <span>{showConcession ? "Final Fee" : "Approx. Fees"}</span>
+            <span>Approx. Fees</span>
           </div>
-          
-          {showConcession ? (
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="text-lg font-bold text-success">
-                  {finalFee === 0 ? "FREE" : `₹${finalFee.toLocaleString()}`}
-                </p>
-              </div>
-              <div className="flex items-center gap-1 mt-0.5">
-                <span className="text-xs line-through text-muted-foreground">
-                  ₹{baseFee.toLocaleString()}
-                </span>
-                <span className="inline-flex items-center gap-0.5 text-xs text-success font-medium">
-                  <TrendingDown className="h-3 w-3" />
-                  {concessionLabel}
-                </span>
-              </div>
-            </div>
-          ) : (
-            <p className="text-lg font-bold text-foreground">₹{baseFee.toLocaleString()}</p>
-          )}
+          <p className="text-lg font-bold text-foreground">₹{fee.toLocaleString()}</p>
         </div>
       </div>
-
-      {/* Concession Breakdown (when applicable) */}
-      {showConcession && concessionAmount > 0 && (
-        <div className="bg-success/10 border border-success/20 rounded-md p-2 mb-3">
-          <div className="flex items-center gap-1.5 text-success">
-            <Tag className="h-3.5 w-3.5" />
-            <span className="text-xs font-medium">
-              You save ₹{concessionAmount.toLocaleString()} ({concessionPercent}% {selectedCategory.toUpperCase()} concession)
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* All Category Cutoffs (if no category selected) */}
       {selectedCategory === "all" && (
