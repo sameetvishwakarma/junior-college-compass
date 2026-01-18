@@ -37,16 +37,8 @@ const Header = () => {
           >
             Find Colleges
           </Link>
-          <Link
-            to="/admission"
-            className={`text-sm font-medium transition-colors hover:text-primary ${
-              isActive("/admission") ? "text-primary" : "text-muted-foreground"
-            }`}
-          >
-            Apply Now
-          </Link>
           <Button asChild size="sm">
-            <Link to="/discover">Explore</Link>
+            <Link to="/discover">Explore Now</Link>
           </Button>
         </nav>
 
@@ -86,18 +78,9 @@ const Header = () => {
             >
               Find Colleges
             </Link>
-            <Link
-              to="/admission"
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                isActive("/admission") ? "text-primary" : "text-muted-foreground"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Apply Now
-            </Link>
             <Button asChild size="sm" className="w-fit">
               <Link to="/discover" onClick={() => setIsMenuOpen(false)}>
-                Explore
+                Explore Now
               </Link>
             </Button>
           </nav>
